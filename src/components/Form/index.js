@@ -1,33 +1,40 @@
 import React from 'react'
 import TextFields from './TextFields'
-import { css } from 'emotion'
+import { Redirect } from '@reach/router'
+import { saveUserFields } from '../../api'
 
 export default class Form extends React.Component {
   constructor (props) {
     super(props)
-    const state = {
-      roles: '',
-      fullName: '',
-      nationalID: '',
-      gender: '',
-      address: '',
-      postalBox: '',
-      postalCode: '',
-      email: '',
-      contactNumber: ''
+    this.state = {
+      formFields: {
+        fullName: '',
+        nationalID: '',
+        gender: '',
+        address: '',
+        postalBox: '',
+        postalCode: '',
+        email: '',
+        contactNumber: ''
+      },
+      refId: props.loginRefId || '207893435024146948',
+      isSaving: false,
+      redirect: false
     }
     const { fetchedFields } = props
     console.log(fetchedFields)
     if (fetchedFields && fetchedFields.data) {
-      this.state = { ...state, ...fetchedFields.data }
-    } else {
-      this.state = state
+      this.state.formFields = {
+        ...this.state.formFields,
+        ...fetchedFields.data
+      }
     }
   }
 
   handleChange = event => {
     const { value, name } = event.target
-    this.setState({ [name]: value })
+    const { formFields } = this.state
+    this.setState({ formFields: { ...formFields, [name]: value } })
   }
   /*
   * Form responsible for:
@@ -37,27 +44,27 @@ export default class Form extends React.Component {
   * pass values / handle submition
   *
   */
+  submitHandler = async e => {
+    e.preventDefault()
+    this.setState({ isSaving: true })
+    const { refId } = this.state
+    await saveUserFields({ ...this.state.formFields, refId })
+    this.setState({ redirect: true })
+  }
 
   render () {
+    if (this.state.redirect) {
+      return <Redirect to='/' />
+    }
     return (
-      <form
-        onSubmit={e => {
-          e.preventDefault()
-          this.props.onSubmit(this.state)
-        }}
-      >
-        <TextFields values={this.state} onChange={this.handleChange} />
+      <form onSubmit={this.submitHandler}>
+        <TextFields
+          values={this.state.formFields}
+          onChange={this.handleChange}
+        />
         <p>
-          <button
-            className={css`
-          font-size: 1.5em;
-          padding: 6px 8px;
-          border: solid #cccffd;
-          background-color: #ccdffd;
-          `}
-            type='submit'
-          >
-            {' '}submit{' '}
+          <button disabled={this.state.isSaving} type='submit'>
+            submit
           </button>
         </p>
         {JSON.stringify(this.state, null, 2)}

@@ -1,5 +1,6 @@
 import React from 'react'
 import TextFields from './TextFields'
+import { Redirect } from '@reach/router'
 import { saveUserFields } from '../../api'
 
 export default class Form extends React.Component {
@@ -16,7 +17,9 @@ export default class Form extends React.Component {
         email: '',
         contactNumber: ''
       },
-      isSaving: false
+      refId: props.loginRefId || '207893435024146948',
+      isSaving: false,
+      redirect: false
     }
     const { fetchedFields } = props
     console.log(fetchedFields)
@@ -44,11 +47,15 @@ export default class Form extends React.Component {
   submitHandler = async e => {
     e.preventDefault()
     this.setState({ isSaving: true })
-    await saveUserFields(this.state.formFields)
-    this.setState({ isSaving: false })
+    const { refId } = this.state
+    await saveUserFields({ ...this.state.formFields, refId })
+    this.setState({ redirect: true })
   }
 
   render () {
+    if (this.state.redirect) {
+      return <Redirect to='/' />
+    }
     return (
       <form onSubmit={this.submitHandler}>
         <TextFields
@@ -57,7 +64,7 @@ export default class Form extends React.Component {
         />
         <p>
           <button disabled={this.state.isSaving} type='submit'>
-            {' '}submit{' '}
+            submit
           </button>
         </p>
         {JSON.stringify(this.state, null, 2)}

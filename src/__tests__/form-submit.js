@@ -49,7 +49,7 @@ test('should render form with submit button', async () => {
   await wait(() => {
     expect(MockRedirect).toHaveBeenCalledTimes(1)
   })
-  expect(MockRedirect).toHaveBeenCalledWith({ to: '/' }, {})
+  expect(MockRedirect).toHaveBeenCalledWith({ to: '/thanks' }, {})
 
   // debug()
 })

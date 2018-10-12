@@ -54,7 +54,7 @@ export default class Form extends React.Component {
 
   render () {
     if (this.state.redirect) {
-      return <Redirect to='/' />
+      return <Redirect to='/thanks' />
     }
     return (
       <form onSubmit={this.submitHandler}>
